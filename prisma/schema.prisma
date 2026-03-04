@@ -22,6 +22,6 @@ model Documento {
    id String @id @default(uuid())
    titulo String
    descricao String @db.Text
-   status Status
-   criado_em DateTime 
+   status Status @default(PENDENTE)
+   criado_em DateTime @default(now())
 }

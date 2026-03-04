@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Documento" ALTER COLUMN "criado_em" SET DEFAULT CURRENT_TIMESTAMP;
