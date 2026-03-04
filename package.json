@@ -4,7 +4,7 @@
   "description": "Document manager API for SuperSign",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx watch index.ts"
+    "dev": "tsx watch src/index.ts"
   },
   "keywords": [],
   "author": "Vinicyos Ferreira",
@@ -26,6 +26,8 @@
     "@prisma/adapter-pg": "^7.4.2",
     "@prisma/client": "^7.4.2",
     "dotenv": "^17.3.1",
-    "fastify": "^5.7.4"
+    "fastify": "^5.7.4",
+    "fastify-type-provider-zod": "^6.1.0",
+    "zod": "^4.3.6"
   }
 }
