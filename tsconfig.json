@@ -6,7 +6,6 @@
     "moduleResolution": "nodenext",
     "target": "es2024",
     "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
     "strict": true,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,

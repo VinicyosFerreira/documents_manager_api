@@ -4,3 +4,8 @@ node_modules
 # dist
 /dist
 
+# prisma generated
+/generated/prisma
+
+# envoriments variables
+.env
