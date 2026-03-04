@@ -4,7 +4,7 @@
   "description": "Document manager API for SuperSign",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "tsx watch index.ts"
   },
   "keywords": [],
   "author": "Vinicyos Ferreira",
@@ -17,7 +17,11 @@
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.4.0",
     "prettier": "3.8.1",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.56.1"
+  },
+  "dependencies": {
+    "fastify": "^5.7.4"
   }
 }
