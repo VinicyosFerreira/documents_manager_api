@@ -1,8 +1,8 @@
 import { prisma } from "../../lib/prisma.js";
-import type { GetDocumentOutputDTO } from "../../dtos/index.js";
+import type { DocumentOutputDTO } from "../../dtos/index.js";
 
 export class GetDocumentsRepository {
-    async execute(): Promise<GetDocumentOutputDTO[]> {
+    async execute(): Promise<DocumentOutputDTO[]> {
         return await prisma.documento.findMany();
     }
 }

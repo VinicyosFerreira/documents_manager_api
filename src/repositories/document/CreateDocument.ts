@@ -1,13 +1,13 @@
 import { prisma } from '../../lib/prisma.js';
 import type {
   CreateDocumentInputDTO,
-  CreateDocumentOutputDTO,
+  DocumentOutputDTO
 } from '../../dtos/index.js';
 
 export class CreateDocumentRepository {
   async execute(
     data: CreateDocumentInputDTO
-  ): Promise<CreateDocumentOutputDTO> {
+  ): Promise<DocumentOutputDTO> {
     return await prisma.documento.create({
       data: {
         titulo: data.titulo,
