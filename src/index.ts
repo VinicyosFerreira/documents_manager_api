@@ -1,67 +1,52 @@
-import Fastify, { FastifyError } from 'fastify';
+import Fastify from 'fastify';
 import {
   serializerCompiler,
   validatorCompiler,
-  hasZodFastifySchemaValidationErrors,
 } from 'fastify-type-provider-zod';
 import {
   createDocumentRoute,
   deleteDocumentRoute,
   getDocumentsRoute,
   updateStatusDocumentRoute,
-} from './routes/document.js';
-import {
-  DocumentAlreadySignedError,
-  DocumentNotFoundError,
-} from './errors/index.js';
+} from './routes/index.js';
+import fastifySwagger from '@fastify/swagger';
+import fastifySwaggerUi from '@fastify/swagger-ui';
+import { errorHandler } from './errors/error-handler.js';
+import { jsonSchemaTransform } from 'fastify-type-provider-zod';
 const app = Fastify({
-  // logger: true,
+  logger: true,
 });
 
 app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);
 
-app.get('/', async () => {
-  return { hello: 'world' };
+await app.register(fastifySwagger, {
+  openapi: {
+    info: {
+      title: 'Document manager API',
+      description: 'Document manager API',
+      version: '1.0.0',
+    },
+    servers: [
+      {
+        url: 'http://localhost:8080',
+      },
+    ],
+    tags: [
+      {
+        name: 'Document',
+        description: 'Document manager API for SuperSign',
+      },
+    ],
+  },
+  transform: jsonSchemaTransform,
 });
 
-app.setErrorHandler((error: FastifyError, _, reply) => {
-  if (hasZodFastifySchemaValidationErrors(error)) {
-    console.log(error);
-    if (error.validationContext === 'body') {
-      return reply.status(400).send({
-        message: error.validation.map((v) => v.message).join(''),
-        code: 'BAD_REQUEST',
-      });
-    }
-
-    return reply.status(400).send({
-      message: error.validation.map((v) => v.message).join(''),
-      code: 'BAD_REQUEST',
-    });
-  }
-
-  if (error instanceof DocumentAlreadySignedError) {
-    return reply.status(403).send({
-      error:
-        'Documento já assinado, você não tem permissão para alterar o status',
-      code: 'FORBIDDEN',
-    });
-  }
-
-  if (error instanceof DocumentNotFoundError) {
-    return reply.status(404).send({
-      error: 'Documento não encontrado',
-      code: 'NOT_FOUND',
-    });
-  }
-
-  return reply.status(500).send({
-    message: 'Internal server error',
-    code: 'INTERNAL_SERVER_ERROR',
-  });
+await app.register(fastifySwaggerUi, {
+  routePrefix: '/docs',
 });
 
+app.setErrorHandler(errorHandler);
 await app.register(getDocumentsRoute, { prefix: '/documents' });
 await app.register(createDocumentRoute, { prefix: '/documents' });
 await app.register(updateStatusDocumentRoute, { prefix: '/documents' });
@@ -69,7 +54,6 @@ await app.register(deleteDocumentRoute, { prefix: '/documents' });
 
 try {
   await app.listen({ port: 8080 });
-  console.log('Server running on http://localhost:8080');
 } catch (err) {
   app.log.error(err);
   process.exit(1);

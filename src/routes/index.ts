@@ -28,6 +28,7 @@ export const createDocumentRoute = async (app: FastifyInstance) => {
     url: '/',
     schema: {
       body: CreateDocumentSchema,
+      tags: ['Document'],
       response: {
         201: ResponseSuccessSchema,
         400: ZodErrorSchema,
@@ -51,6 +52,7 @@ export const getDocumentsRoute = async (app: FastifyInstance) => {
     method: 'GET',
     url: '/',
     schema: {
+      tags: ['Document'],
       response: {
         200: z.array(ResponseSuccessSchema),
         500: ErrorSchema,
@@ -72,6 +74,7 @@ export const updateStatusDocumentRoute = async (app: FastifyInstance) => {
     method: 'PATCH',
     url: '/:id',
     schema: {
+      tags: ['Document'],
       params: z.object({
         id: z.uuid(),
       }),
@@ -104,6 +107,7 @@ export const deleteDocumentRoute = async (app: FastifyInstance) => {
     method: 'DELETE',
     url: '/:id',
     schema: {
+      tags: ['Document'],
       params: z.object({
         id: z.uuid(),
       }),

@@ -15,7 +15,7 @@ export const ErrorSchema = z.object({
 });
 
 export const ZodErrorSchema = z.object({
-  message: z.string().optional(),
+  error: z.string().optional(),
   code: z.string(),
 })
 
