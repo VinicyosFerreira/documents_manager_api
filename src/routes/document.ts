@@ -5,22 +5,22 @@ import {
   CreateDocumentUseCase,
   GetDocumentsUseCase,
   UpdateStatusDocumentUseCase,
+  DeleteDocumentUseCase,
 } from '../use-cases/index.js';
 import {
   CreateDocumentRepository,
   GetDocumentByIdRepository,
   GetDocumentsRepository,
   UpdateStatusDocumentRepository,
+  DeleteDocumentRepository,
 } from '../repositories/index.js';
 import {
   CreateDocumentSchema,
   ErrorSchema,
+  ResponseDeleteDocumentSchema,
   ResponseSuccessSchema,
+  ZodErrorSchema,
 } from '../schemas/index.js';
-import {
-  DocumentAlreadySignedError,
-  DocumentNotFoundError,
-} from '../errors/index.js';
 
 export const createDocumentRoute = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({
@@ -30,26 +30,18 @@ export const createDocumentRoute = async (app: FastifyInstance) => {
       body: CreateDocumentSchema,
       response: {
         201: ResponseSuccessSchema,
-        400: ErrorSchema,
+        400: ZodErrorSchema,
         500: ErrorSchema,
       },
     },
     handler: async (request, reply) => {
-      try {
-        const createDocumentRepository = new CreateDocumentRepository();
-        const createDocumentUseCase = new CreateDocumentUseCase(
-          createDocumentRepository
-        );
-        const result = await createDocumentUseCase.execute(request.body);
-        console.log(result);
-        return reply.status(201).send(result);
-      } catch (err) {
-        app.log.error(err);
-        return reply.status(500).send({
-          error: 'Internal server error',
-          code: 'INTERNAL_SERVER_ERROR',
-        });
-      }
+      const createDocumentRepository = new CreateDocumentRepository();
+      const createDocumentUseCase = new CreateDocumentUseCase(
+        createDocumentRepository
+      );
+      const result = await createDocumentUseCase.execute(request.body);
+      console.log(result);
+      return reply.status(201).send(result);
     },
   });
 };
@@ -65,20 +57,12 @@ export const getDocumentsRoute = async (app: FastifyInstance) => {
       },
     },
     handler: async (_, reply) => {
-      try {
-        const getDocumentsRepository = new GetDocumentsRepository();
-        const getDocumentsUseCase = new GetDocumentsUseCase(
-          getDocumentsRepository
-        );
-        const result = await getDocumentsUseCase.execute();
-        return reply.status(200).send(result);
-      } catch (err) {
-        app.log.error(err);
-        return reply.status(500).send({
-          error: 'Internal server error',
-          code: 'INTERNAL_SERVER_ERROR',
-        });
-      }
+      const getDocumentsRepository = new GetDocumentsRepository();
+      const getDocumentsUseCase = new GetDocumentsUseCase(
+        getDocumentsRepository
+      );
+      const result = await getDocumentsUseCase.execute();
+      return reply.status(200).send(result);
     },
   });
 };
@@ -93,48 +77,55 @@ export const updateStatusDocumentRoute = async (app: FastifyInstance) => {
       }),
       response: {
         200: ResponseSuccessSchema,
-        400: ErrorSchema,
         403: ErrorSchema,
+        400: ZodErrorSchema,
         404: ErrorSchema,
         500: ErrorSchema,
       },
     },
     handler: async (request, reply) => {
-      try {
-        const updateStatusDocumentRepository =
-          new UpdateStatusDocumentRepository();
-        const getDocumentByIdRepository = new GetDocumentByIdRepository();
-        const updateStatusDocumentUseCase = new UpdateStatusDocumentUseCase(
-          updateStatusDocumentRepository,
-          getDocumentByIdRepository
-        );
-        const result = await updateStatusDocumentUseCase.execute(
-          request.params.id
-        );
-        return reply.status(200).send(result);
-      } catch (err) {
-        app.log.error(err);
+      const updateStatusDocumentRepository =
+        new UpdateStatusDocumentRepository();
+      const getDocumentByIdRepository = new GetDocumentByIdRepository();
+      const updateStatusDocumentUseCase = new UpdateStatusDocumentUseCase(
+        updateStatusDocumentRepository,
+        getDocumentByIdRepository
+      );
+      const result = await updateStatusDocumentUseCase.execute(
+        request.params.id
+      );
+      return reply.status(200).send(result);
+    },
+  });
+};
 
-        if (err instanceof DocumentNotFoundError) {
-          return reply.status(404).send({
-            error: 'Documento não encontrado',
-            code: 'NOT_FOUND',
-          });
-        }
+export const deleteDocumentRoute = async (app: FastifyInstance) => {
+  app.withTypeProvider<ZodTypeProvider>().route({
+    method: 'DELETE',
+    url: '/:id',
+    schema: {
+      params: z.object({
+        id: z.uuid(),
+      }),
+      response: {
+        200: ResponseDeleteDocumentSchema,
+        400: ZodErrorSchema,
+        404: ErrorSchema,
+        500: ErrorSchema,
+      },
+    },
+    handler: async (request, reply) => {
+      const deleteDocumentRepository = new DeleteDocumentRepository();
+      const getDocumentByIdRepository = new GetDocumentByIdRepository();
+      const deleteDocumentUseCase = new DeleteDocumentUseCase(
+        deleteDocumentRepository,
+        getDocumentByIdRepository
+      );
 
-        if (err instanceof DocumentAlreadySignedError) {
-          return reply.status(403).send({
-            error:
-              'Documento já assinado, você não tem permissão para alterar o status',
-            code: 'FORBIDDEN',
-          });
-        }
-
-        return reply.status(500).send({
-          error: 'Internal server error',
-          code: 'INTERNAL_SERVER_ERROR',
-        });
-      }
+      await deleteDocumentUseCase.execute(request.params.id);
+      return reply.status(200).send({
+        message: 'Documento deletado com sucesso',
+      });
     },
   });
 };

@@ -14,10 +14,19 @@ export const ErrorSchema = z.object({
   code: z.string(),
 });
 
+export const ZodErrorSchema = z.object({
+  message: z.string().optional(),
+  code: z.string(),
+})
+
 export const ResponseSuccessSchema = z.object({
   id: z.uuid(),
   titulo: z.string().trim().min(1),
   descricao: z.string().trim().min(1),
   status: z.enum(['PENDENTE', 'ASSINADO']),
   criado_em: z.date(),
+});
+
+export const ResponseDeleteDocumentSchema = z.object({
+  message: z.string(),
 });
