@@ -5,7 +5,7 @@ export interface CreateDocumentInputDTO {
   descricao: string;
 }
 
-export interface CreateDocumentOutputDTO {
+export interface DocumentOutputDTO {
   id: string;
   titulo: string;
   descricao: string;

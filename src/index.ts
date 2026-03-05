@@ -4,8 +4,15 @@ import {
   validatorCompiler,
   hasZodFastifySchemaValidationErrors,
 } from 'fastify-type-provider-zod';
-import { createDocumentRoute, getDocumentsRoute } from './routes/document.js';
-const app = Fastify({});
+import {
+  createDocumentRoute,
+  getDocumentsRoute,
+  updateStatusDocumentRoute,
+} from './routes/document.js';
+const app = Fastify({
+  logger: true,
+});
+
 app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);
 
@@ -14,13 +21,11 @@ app.get('/', async () => {
 });
 
 app.setErrorHandler((error: FastifyError, _, reply) => {
-  console.log(error);
   if (hasZodFastifySchemaValidationErrors(error)) {
-
     return reply
       .status(400)
       .header('Content-Type', 'application/json; charset=utf-8')
-      .serializer(payload => JSON.stringify(payload)) 
+      .serializer((payload) => JSON.stringify(payload))
       .send({
         message:
           'O título ou descrição precisam ser texto e não podem estar vazios',
@@ -36,6 +41,7 @@ app.setErrorHandler((error: FastifyError, _, reply) => {
 
 await app.register(getDocumentsRoute, { prefix: '/documents' });
 await app.register(createDocumentRoute, { prefix: '/documents' });
+await app.register(updateStatusDocumentRoute, { prefix: '/documents' });
 
 try {
   await app.listen({ port: 8080 });
