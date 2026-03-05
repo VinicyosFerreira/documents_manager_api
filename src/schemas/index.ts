@@ -13,3 +13,11 @@ export const ErrorSchema = z.object({
   error: z.string(),
   code: z.string(),
 });
+
+export const ResponseSuccessSchema = z.object({
+  id: z.uuid(),
+  titulo: z.string().trim().min(1),
+  descricao: z.string().trim().min(1),
+  status: z.enum(['PENDENTE', 'ASSINADO']),
+  criado_em: z.date(),
+});
