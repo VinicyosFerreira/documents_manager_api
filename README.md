@@ -50,7 +50,7 @@ src/
 
 ``cd documents_manager_api``
 
-**2.Configurar o env**: Crie um arquivo .env para o database seguindo o .env.example
+**2.Configurar o env**: Crie um arquivo .env para o database e configure uma PORT seguindo o .env.example
 
 **3.Docker compose**: `docker-compose up -d`
 
@@ -66,4 +66,4 @@ src/
 
 **Código Fonte**: [https://github.com/VinicyosFerreira/documents_manager_api]
 
-**Codigo Fonte Front-End**: ["]
+**Codigo Fonte Front-End**: ["https://github.com/VinicyosFerreira/documents_manager_frontend]
