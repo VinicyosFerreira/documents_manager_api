@@ -5,7 +5,7 @@
 ## 🚀 Tecnologias
 **Node.js & TypeScript**: Runtime e linguagem base para viabilizar um código tipado e seguro.
 
-**Fastify**: Framework para a construção do servidor HTTP com
+**Fastify**: Framework para a construção do servidor HTTP
 
 **PostgreSQL**: Banco de dados relacional para persistência sólida dos dados.
 
@@ -35,7 +35,7 @@ src/
 
 **Tratamento de Errors**: Uso do setErrorHandler global para centralização do tratamento de erros da API.
 
-**Injeção de Dependência**: Estrutura que facilita a manutenção e a testabilidade dos módulos, seguindo principios do SOLID e Clean Arch
+**Injeção de Dependência**: Estrutura que facilita a manutenção e a testabilidade dos módulos, seguindo principios do SOLID e Clean Architecture.
 
 **Segurança e Validação**: Uso Zod integrado com Fastify garantindo schemas validados e seguros.
 
