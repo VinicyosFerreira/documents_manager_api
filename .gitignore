@@ -9,3 +9,4 @@ node_modules
 
 # envoriments variables
 .env
+.env.example

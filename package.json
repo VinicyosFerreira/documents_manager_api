@@ -4,6 +4,7 @@
   "description": "Document manager API for SuperSign",
   "main": "index.js",
   "scripts": {
+    "postinstall": "prisma generate",
     "dev": "tsx watch src/index.ts"
   },
   "keywords": [],
