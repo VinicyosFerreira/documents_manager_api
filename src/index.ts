@@ -60,7 +60,9 @@ await app.register(updateStatusDocumentRoute, { prefix: '/documents' });
 await app.register(deleteDocumentRoute, { prefix: '/documents' });
 
 try {
-  await app.listen({ port: 8080 });
+  await app.listen({
+    port: Number(process.env.PORT) || 8080
+  });
 } catch (err) {
   app.log.error(err);
   process.exit(1);
