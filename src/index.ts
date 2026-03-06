@@ -13,12 +13,19 @@ import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
 import { errorHandler } from './errors/error-handler.js';
 import { jsonSchemaTransform } from 'fastify-type-provider-zod';
+import fastifyCors from '@fastify/cors';
+
 const app = Fastify({
   logger: true,
 });
 
+app.register(fastifyCors, {
+  origin: ['http://localhost:3000'],
+})
+
 app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);
+
 
 await app.register(fastifySwagger, {
   openapi: {
