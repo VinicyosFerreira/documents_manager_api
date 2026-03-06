@@ -8,7 +8,6 @@ export const errorHandler = (
   reply: FastifyReply
 ) => {
   if (hasZodFastifySchemaValidationErrors(error)) {
-    console.log(error);
     if (error.validationContext === 'body') {
       return reply.status(400).send({
         error: error.validation.map((v) => v.message).join(''),
@@ -38,7 +37,7 @@ export const errorHandler = (
   }
 
   return reply.status(500).send({
-    message: 'Internal server error',
+    error: 'Internal server error',
     code: 'INTERNAL_SERVER_ERROR',
   });
 };

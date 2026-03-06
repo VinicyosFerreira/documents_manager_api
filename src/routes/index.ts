@@ -41,7 +41,6 @@ export const createDocumentRoute = async (app: FastifyInstance) => {
         createDocumentRepository
       );
       const result = await createDocumentUseCase.execute(request.body);
-      console.log(result);
       return reply.status(201).send(result);
     },
   });
