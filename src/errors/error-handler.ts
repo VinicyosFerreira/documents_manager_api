@@ -10,13 +10,13 @@ export const errorHandler = (
   if (hasZodFastifySchemaValidationErrors(error)) {
     if (error.validationContext === 'body') {
       return reply.status(400).send({
-        error: error.validation.map((v) => v.message).join(''),
+        error: `Campo ${error.validation[0].instancePath.substring(1)} é obrigatório ou está inválido`,
         code: 'BAD_REQUEST',
       });
     }
 
     return reply.status(400).send({
-      error: error.validation.map((v) => v.message).join(''),
+      error: "Há parâmetros inválidos ou faltante na requisição",
       code: 'BAD_REQUEST',
     });
   }
