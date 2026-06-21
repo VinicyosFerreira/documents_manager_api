@@ -7,8 +7,8 @@ export class CreateDocumentUseCase {
   constructor(private createDocumentRepository: CreateDocumentRepository) {
     this.createDocumentRepository = createDocumentRepository;
   }
-  async execute(dto: CreateDocumentInputDTO): Promise<DocumentOutputDTO> {
-    const result = await this.createDocumentRepository.execute(dto);
+  async execute(data: CreateDocumentInputDTO): Promise<DocumentOutputDTO> {
+    const result = await this.createDocumentRepository.execute(data);
     return result;
   }
 }
