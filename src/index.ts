@@ -8,6 +8,7 @@ import {
   deleteDocumentRoute,
   getDocumentsRoute,
   updateStatusDocumentRoute,
+  updateDocumentRoute
 } from './routes/index.js';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
@@ -25,7 +26,6 @@ app.register(fastifyCors, {
 
 app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);
-
 
 await app.register(fastifySwagger, {
   openapi: {
@@ -56,8 +56,9 @@ await app.register(fastifySwaggerUi, {
 app.setErrorHandler(errorHandler);
 await app.register(getDocumentsRoute, { prefix: '/documents' });
 await app.register(createDocumentRoute, { prefix: '/documents' });
-await app.register(updateStatusDocumentRoute, { prefix: '/documents' });
+await app.register(updateStatusDocumentRoute, { prefix: '/documents/sign' });
 await app.register(deleteDocumentRoute, { prefix: '/documents' });
+await app.register(updateDocumentRoute, { prefix: '/documents' });
 
 try {
   await app.listen({

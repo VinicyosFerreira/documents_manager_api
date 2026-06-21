@@ -9,6 +9,8 @@ export const CreateDocumentSchema = z.object({
   }),
 });
 
+export const UpdateDocumentSchema = CreateDocumentSchema.partial();
+
 export const ErrorSchema = z.object({
   error: z.string(),
   code: z.string(),

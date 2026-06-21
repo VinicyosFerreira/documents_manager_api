@@ -5,6 +5,8 @@ export interface CreateDocumentInputDTO {
   descricao: string;
 }
 
+export type UpdateDocumentInputDTO = Partial<CreateDocumentInputDTO>;
+
 export interface DocumentOutputDTO {
   id: string;
   titulo: string;

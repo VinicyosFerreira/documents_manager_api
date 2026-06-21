@@ -6,6 +6,7 @@ import {
   GetDocumentsUseCase,
   UpdateStatusDocumentUseCase,
   DeleteDocumentUseCase,
+  UpdateDocumentUseCase
 } from '../use-cases/index.js';
 import {
   CreateDocumentRepository,
@@ -13,10 +14,12 @@ import {
   GetDocumentsRepository,
   UpdateStatusDocumentRepository,
   DeleteDocumentRepository,
+  UpdateDocumentRepository
 } from '../repositories/index.js';
 import {
   CreateDocumentSchema,
   ErrorSchema,
+  UpdateDocumentSchema,
   ResponseDeleteDocumentSchema,
   ResponseSuccessSchema,
   ZodErrorSchema,
@@ -67,6 +70,39 @@ export const getDocumentsRoute = async (app: FastifyInstance) => {
     },
   });
 };
+
+export const updateDocumentRoute = async (app: FastifyInstance) => {
+  app.withTypeProvider<ZodTypeProvider>().route({
+    method: 'PATCH',
+    url: '/:id',
+    schema: {
+      params: z.object({
+        id: z.uuid(),
+      }),
+      body: UpdateDocumentSchema,
+      tags: ['Document'],
+      response: {
+        200: ResponseSuccessSchema,
+        400: ZodErrorSchema,
+        404: ErrorSchema,
+        500: ErrorSchema,
+      },
+    },
+    handler: async (request, reply) => {
+      const updateDocumentRepository = new UpdateDocumentRepository();
+      const getDocumentByIdRepository = new GetDocumentByIdRepository();
+      const updateDocumentUseCase = new UpdateDocumentUseCase(
+        updateDocumentRepository,
+        getDocumentByIdRepository
+      );
+      const result = await updateDocumentUseCase.execute(
+        request.params.id,
+        request.body
+      );
+      return reply.status(200).send(result);
+    },
+  })
+}
 
 export const updateStatusDocumentRoute = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({
