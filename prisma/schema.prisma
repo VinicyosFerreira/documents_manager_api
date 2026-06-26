@@ -14,14 +14,15 @@ datasource db {
 }
 
 enum Status {
-   PENDENTE
-   ASSINADO
+   PENDING
+   SIGNED
 }
 
-model Documento {
+model Document {
    id String @id @default(uuid())
-   titulo String
-   descricao String @db.Text
-   status Status @default(PENDENTE)
-   criado_em DateTime @default(now())
+   title String
+   description String @db.Text 
+   status Status @default(PENDING)
+   documentKey String 
+   createdAt DateTime @default(now())
 }
