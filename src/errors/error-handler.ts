@@ -4,9 +4,10 @@ import { DocumentAlreadySignedError, DocumentNotFoundError } from './index.js';
 
 export const errorHandler = (
   error: FastifyError,
-  _request: FastifyRequest,
+  request: FastifyRequest,
   reply: FastifyReply
 ) => {
+  request.log.error(error);
   if (hasZodFastifySchemaValidationErrors(error)) {
     if (error.validationContext === 'body') {
       return reply.status(400).send({
@@ -16,7 +17,7 @@ export const errorHandler = (
     }
 
     return reply.status(400).send({
-      error: "Há parâmetros inválidos ou faltante na requisição",
+      error: 'Há parâmetros inválidos ou faltante na requisição',
       code: 'BAD_REQUEST',
     });
   }
