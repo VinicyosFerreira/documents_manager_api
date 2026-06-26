@@ -1,16 +1,36 @@
-import { Status } from "../../../generated/prisma/enums.js";
+import { Status } from '../../../generated/prisma/enums.js';
+import { MultipartFile } from '@fastify/multipart';
 
 export interface CreateDocumentInputDTO {
-  titulo: string;
-  descricao: string;
+  title: {
+    value: string;
+  };
+  description: {
+    value: string;
+  };
+  file: MultipartFile;
 }
 
-export type UpdateDocumentInputDTO = Partial<CreateDocumentInputDTO>;
+export type CreateDocumentRepositoryDTO = Omit<
+  CreateDocumentInputDTO,
+  'file'
+> & {
+  documentKey: string;
+};
+
+export type UpdateDocumentInputDTO = Partial<
+  CreateDocumentInputDTO & { documentKey?: string }
+>;
 
 export interface DocumentOutputDTO {
   id: string;
-  titulo: string;
-  descricao: string;
+  title: string;
+  documentUrl: string;
+  description: string;
   status: Status;
-  criado_em: Date;
+  createdAt: Date;
 }
+
+export type DocumentRepositoryDTO = Omit<DocumentOutputDTO, 'documentUrl'> & {
+  documentKey: string;
+};

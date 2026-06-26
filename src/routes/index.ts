@@ -6,7 +6,8 @@ import {
   GetDocumentsUseCase,
   UpdateStatusDocumentUseCase,
   DeleteDocumentUseCase,
-  UpdateDocumentUseCase
+  UpdateDocumentUseCase,
+  UploadStorageUseCase,
 } from '../use-cases/index.js';
 import {
   CreateDocumentRepository,
@@ -14,7 +15,7 @@ import {
   GetDocumentsRepository,
   UpdateStatusDocumentRepository,
   DeleteDocumentRepository,
-  UpdateDocumentRepository
+  UpdateDocumentRepository,
 } from '../repositories/index.js';
 import {
   CreateDocumentSchema,
@@ -40,10 +41,25 @@ export const createDocumentRoute = async (app: FastifyInstance) => {
     },
     handler: async (request, reply) => {
       const createDocumentRepository = new CreateDocumentRepository();
+      const uploadStorageUseCase = new UploadStorageUseCase();
       const createDocumentUseCase = new CreateDocumentUseCase(
-        createDocumentRepository
+        createDocumentRepository,
+        uploadStorageUseCase
       );
-      const result = await createDocumentUseCase.execute(request.body);
+
+      const file = request.body.file;
+
+      if (!file || file.mimetype !== 'application/pdf') {
+        return reply.status(400).send({
+          code: 'BAD_REQUEST',
+          error: 'Arquivo inválido, obrigatoriamente PDF',
+        });
+      }
+
+      const result = await createDocumentUseCase.execute({
+        ...request.body,
+        file,
+      });
       return reply.status(201).send(result);
     },
   });
@@ -62,8 +78,10 @@ export const getDocumentsRoute = async (app: FastifyInstance) => {
     },
     handler: async (_, reply) => {
       const getDocumentsRepository = new GetDocumentsRepository();
+      const uploadStorageUseCase = new UploadStorageUseCase();
       const getDocumentsUseCase = new GetDocumentsUseCase(
-        getDocumentsRepository
+        getDocumentsRepository,
+        uploadStorageUseCase
       );
       const result = await getDocumentsUseCase.execute();
       return reply.status(200).send(result);
@@ -91,18 +109,34 @@ export const updateDocumentRoute = async (app: FastifyInstance) => {
     handler: async (request, reply) => {
       const updateDocumentRepository = new UpdateDocumentRepository();
       const getDocumentByIdRepository = new GetDocumentByIdRepository();
+      const uploadStorageUseCase = new UploadStorageUseCase();
       const updateDocumentUseCase = new UpdateDocumentUseCase(
         updateDocumentRepository,
-        getDocumentByIdRepository
+        getDocumentByIdRepository,
+        uploadStorageUseCase
       );
+      const file = request.body.file;
+
+      if (file && file.mimetype !== 'application/pdf') {
+        return reply.status(400).send({
+          code: 'BAD_REQUEST',
+          error: 'Arquivo inválido, obrigatoriamente PDF',
+        });
+      }
+
+      const data = {
+        ...request.body,
+        file,
+      };
+
       const result = await updateDocumentUseCase.execute(
         request.params.id,
-        request.body
+        data
       );
       return reply.status(200).send(result);
     },
-  })
-}
+  });
+};
 
 export const updateStatusDocumentRoute = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({
@@ -125,9 +159,11 @@ export const updateStatusDocumentRoute = async (app: FastifyInstance) => {
       const updateStatusDocumentRepository =
         new UpdateStatusDocumentRepository();
       const getDocumentByIdRepository = new GetDocumentByIdRepository();
+      const uploadStorageUseCase = new UploadStorageUseCase();
       const updateStatusDocumentUseCase = new UpdateStatusDocumentUseCase(
         updateStatusDocumentRepository,
-        getDocumentByIdRepository
+        getDocumentByIdRepository,
+        uploadStorageUseCase
       );
       const result = await updateStatusDocumentUseCase.execute(
         request.params.id
@@ -156,9 +192,11 @@ export const deleteDocumentRoute = async (app: FastifyInstance) => {
     handler: async (request, reply) => {
       const deleteDocumentRepository = new DeleteDocumentRepository();
       const getDocumentByIdRepository = new GetDocumentByIdRepository();
+      const uploadStorageUseCase = new UploadStorageUseCase();
       const deleteDocumentUseCase = new DeleteDocumentUseCase(
         deleteDocumentRepository,
-        getDocumentByIdRepository
+        getDocumentByIdRepository,
+        uploadStorageUseCase
       );
 
       await deleteDocumentUseCase.execute(request.params.id);

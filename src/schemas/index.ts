@@ -1,15 +1,26 @@
 import z from 'zod';
+import { MultipartFile } from '@fastify/multipart';
 
 export const CreateDocumentSchema = z.object({
-  titulo: z.string().trim().min(1, {
-    message: 'O título é obrigatório',
+  title: z.object({
+    value: z.string().trim().min(1, {
+      error: 'O título é obrigatório',
+    }),
   }),
-  descricao: z.string().trim().min(1, {
-    message: 'A descrição é obrigatória',
+  description: z.object({
+    value: z.string().trim().min(1, {
+      error: 'A descrição e obrigatorio',
+    }),
   }),
+  file: z.custom<MultipartFile>(),
 });
 
 export const UpdateDocumentSchema = CreateDocumentSchema.partial();
+
+
+export const ResponseSavePdfSchema = z.object({
+  message: z.string(),
+});
 
 export const ErrorSchema = z.object({
   error: z.string(),
@@ -19,14 +30,15 @@ export const ErrorSchema = z.object({
 export const ZodErrorSchema = z.object({
   error: z.string().optional(),
   code: z.string(),
-})
+});
 
 export const ResponseSuccessSchema = z.object({
   id: z.uuid(),
-  titulo: z.string().trim().min(1),
-  descricao: z.string().trim().min(1),
-  status: z.enum(['PENDENTE', 'ASSINADO']),
-  criado_em: z.date(),
+  title: z.string().trim().min(1),
+  description: z.string().trim().min(1),
+  documentUrl: z.string(),
+  status: z.enum(['PENDING', 'SIGNED']),
+  createdAt: z.date(),
 });
 
 export const ResponseDeleteDocumentSchema = z.object({

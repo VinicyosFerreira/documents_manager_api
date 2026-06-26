@@ -1,13 +1,17 @@
 import {prisma} from '../../lib/prisma.js'
-import type { DocumentOutputDTO, UpdateDocumentInputDTO } from '../../dtos/index.js';
+import type {  DocumentRepositoryDTO, UpdateDocumentInputDTO } from '../../dtos/index.js';
 
 export class UpdateDocumentRepository {
-    async execute(id: string, data: UpdateDocumentInputDTO): Promise<DocumentOutputDTO> {
-        return await prisma.documento.update({
+    async execute(id: string, data: UpdateDocumentInputDTO): Promise<DocumentRepositoryDTO> {
+        return await prisma.document.update({
             where: {
                 id: id,
             },
-            data: data,
+            data: {
+                title: data.title?.value,
+                description: data.description?.value,
+                documentKey: data?.documentKey
+            },
         });
     }
 }

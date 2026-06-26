@@ -1,14 +1,14 @@
 import { prisma } from '../../lib/prisma.js';
-import type { DocumentOutputDTO } from '../../dtos/index.js';
+import type { DocumentRepositoryDTO } from '../../dtos/index.js';
 
 export class UpdateStatusDocumentRepository {
-  async execute(id: string): Promise<DocumentOutputDTO> {
-    return await prisma.documento.update({
+  async execute(id: string): Promise<DocumentRepositoryDTO> {
+    return await prisma.document.update({
       where: {
         id: id,
       },
       data: {
-        status: 'ASSINADO',
+        status: 'SIGNED',
       },
     });
   }
