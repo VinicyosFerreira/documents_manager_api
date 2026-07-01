@@ -16,7 +16,7 @@ export const CreateUserSchema = z.object({
       error: 'O CPF é obrigatório',
     })
     .refine((value) => validateCpf(value), {
-      message: 'O CPF é inválido',
+      message: 'O CPF é inválido, utilize o formato 000.000.000-00',
     }),
   email: z
     .email({
@@ -30,6 +30,8 @@ export const CreateUserSchema = z.object({
     error: 'A senha precisa ter no mínimo 8 caracteres',
   }),
 });
+
+export const UpdateUserSchema = CreateUserSchema.partial();
 
 export const ResponseUserSuccessSchema = z.object({
   id: z.uuid(),

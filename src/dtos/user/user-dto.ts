@@ -5,6 +5,8 @@ export interface UserInputDTO {
     password: string;
 }
 
+export type UserUpdateInputDTO = Partial<UserInputDTO>;
+
 export interface UserOutputDTO {
     id: string;
     name: string;
