@@ -22,7 +22,7 @@ import {
   ErrorSchema,
   UpdateDocumentSchema,
   ResponseDeleteDocumentSchema,
-  ResponseSuccessSchema,
+  ResponseDocumentSuccessSchema,
   ZodErrorSchema,
 } from '../schemas/index.js';
 
@@ -34,7 +34,7 @@ export const createDocumentRoute = async (app: FastifyInstance) => {
       body: CreateDocumentSchema,
       tags: ['Document'],
       response: {
-        201: ResponseSuccessSchema,
+        201: ResponseDocumentSuccessSchema,
         400: ZodErrorSchema,
         500: ErrorSchema,
       },
@@ -72,7 +72,7 @@ export const getDocumentsRoute = async (app: FastifyInstance) => {
     schema: {
       tags: ['Document'],
       response: {
-        200: z.array(ResponseSuccessSchema),
+        200: z.array(ResponseDocumentSuccessSchema),
         500: ErrorSchema,
       },
     },
@@ -100,7 +100,7 @@ export const updateDocumentRoute = async (app: FastifyInstance) => {
       body: UpdateDocumentSchema,
       tags: ['Document'],
       response: {
-        200: ResponseSuccessSchema,
+        200: ResponseDocumentSuccessSchema,
         400: ZodErrorSchema,
         404: ErrorSchema,
         500: ErrorSchema,
@@ -148,7 +148,7 @@ export const updateStatusDocumentRoute = async (app: FastifyInstance) => {
         id: z.uuid(),
       }),
       response: {
-        200: ResponseSuccessSchema,
+        200: ResponseDocumentSuccessSchema,
         403: ErrorSchema,
         400: ZodErrorSchema,
         404: ErrorSchema,
