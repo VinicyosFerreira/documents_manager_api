@@ -1,6 +1,11 @@
 import { FastifyError, FastifyReply, FastifyRequest } from 'fastify';
 import { hasZodFastifySchemaValidationErrors } from 'fastify-type-provider-zod';
-import { DocumentAlreadySignedError, DocumentNotFoundError } from './index.js';
+import {
+  DocumentAlreadySignedError,
+  DocumentNotFoundError,
+  CpfAlreadyExistError,
+  EmailAlreadyExistsError,
+} from './index.js';
 
 export const errorHandler = (
   error: FastifyError,
@@ -22,11 +27,24 @@ export const errorHandler = (
     });
   }
 
+  if (error instanceof CpfAlreadyExistError) {
+    return reply.status(409).send({
+      error: 'CPF já cadastrado, tente usar outro CPF',
+      code: 'CONFLICT',
+    });
+  }
+
+  if (error instanceof EmailAlreadyExistsError) {
+    return reply.status(409).send({
+      error: 'Email já cadastrado, tente usar outro email',
+      code: 'CONFLICT',
+    });
+  }
+
   if (error instanceof DocumentAlreadySignedError) {
-    return reply.status(403).send({
-      error:
-        'Documento já assinado, você não tem permissão para alterar o status',
-      code: 'FORBIDDEN',
+    return reply.status(409).send({
+      error: 'Documento já assinado, você não pode alterar a assinatura',
+      code: 'CONFLICT',
     });
   }
 
