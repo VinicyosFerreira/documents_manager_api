@@ -4,3 +4,7 @@ export * from './document/GetDocumentById.js';
 export * from './document/UpdateStatusDocument.js';
 export * from './document/DeleteDocument.js';
 export * from './document/UpdateDocument.js';
+export * from './user/CreateUser.js';
+export * from './user/GetUserByEmail.js';
+export * from './user/GetUserByCpf.js';
+export * from './user/GetUserById.js';
