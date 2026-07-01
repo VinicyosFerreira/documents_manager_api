@@ -6,3 +6,4 @@ export * from './document/UpdateDocument.js';
 export * from './storage/UploadStorageUseCase.js';
 export * from './user/CreateUser.js';
 export * from './user/GetUserById.js';
+export * from './user/UpdateUser.js';
