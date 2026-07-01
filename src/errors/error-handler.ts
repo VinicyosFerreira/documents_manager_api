@@ -5,6 +5,7 @@ import {
   DocumentNotFoundError,
   CpfAlreadyExistError,
   EmailAlreadyExistsError,
+  UserNotFoundError,
 } from './index.js';
 
 export const errorHandler = (
@@ -16,7 +17,7 @@ export const errorHandler = (
   if (hasZodFastifySchemaValidationErrors(error)) {
     if (error.validationContext === 'body') {
       return reply.status(400).send({
-        error: `Campo ${error.validation[0].instancePath.substring(1)} é obrigatório ou está inválido`,
+        error: `Campo ${error.validation[0].instancePath.substring(1)}: ${error.validation[0].message}`,
         code: 'BAD_REQUEST',
       });
     }
@@ -38,6 +39,13 @@ export const errorHandler = (
     return reply.status(409).send({
       error: 'Email já cadastrado, tente usar outro email',
       code: 'CONFLICT',
+    });
+  }
+
+  if (error instanceof UserNotFoundError) {
+    return reply.status(404).send({
+      error: 'Usuário não encontrado',
+      code: 'NOT_FOUND',
     });
   }
 
