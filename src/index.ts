@@ -9,7 +9,8 @@ import {
   getDocumentsRoute,
   updateStatusDocumentRoute,
   updateDocumentRoute,
-} from './routes/index.js';
+} from './routes/documentRoute.js';
+import { createUserRoute } from './routes/userRoute.js';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
 import { errorHandler } from './errors/error-handler.js';
@@ -50,8 +51,12 @@ await app.register(fastifySwagger, {
     tags: [
       {
         name: 'Document',
-        description: 'Document manager API for SuperSign',
+        description: 'Document manager API for signed documents',
       },
+      {
+        name: 'User',
+        description: 'User manager API for signed documents',
+      }
     ],
   },
   transform: jsonSchemaTransform,
@@ -62,6 +67,7 @@ await app.register(fastifySwaggerUi, {
 });
 
 app.setErrorHandler(errorHandler);
+await app.register(createUserRoute, { prefix: '/users' });
 await app.register(getDocumentsRoute, { prefix: '/documents' });
 await app.register(createDocumentRoute, { prefix: '/documents' });
 await app.register(updateStatusDocumentRoute, { prefix: '/documents/sign' });
