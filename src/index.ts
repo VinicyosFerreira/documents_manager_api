@@ -10,7 +10,7 @@ import {
   updateStatusDocumentRoute,
   updateDocumentRoute,
 } from './routes/documentRoute.js';
-import { createUserRoute } from './routes/userRoute.js';
+import { createUserRoute, getUserByIdRoute , updateUserRoute} from './routes/userRoute.js';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
 import { errorHandler } from './errors/error-handler.js';
@@ -24,13 +24,13 @@ const app = Fastify({
 
 app.register(fastifyCors, {
   origin: ['http://localhost:3000'],
-})
+});
 
 app.register(fastifyMultipart, {
   limits: {
     fileSize: 5 * 1024 * 1024,
   },
-  attachFieldsToBody: true
+  attachFieldsToBody: true,
 });
 
 app.setValidatorCompiler(validatorCompiler);
@@ -56,7 +56,7 @@ await app.register(fastifySwagger, {
       {
         name: 'User',
         description: 'User manager API for signed documents',
-      }
+      },
     ],
   },
   transform: jsonSchemaTransform,
@@ -67,7 +67,9 @@ await app.register(fastifySwaggerUi, {
 });
 
 app.setErrorHandler(errorHandler);
+await app.register(getUserByIdRoute, { prefix: '/users' });
 await app.register(createUserRoute, { prefix: '/users' });
+await app.register(updateUserRoute, { prefix: '/users' });
 await app.register(getDocumentsRoute, { prefix: '/documents' });
 await app.register(createDocumentRoute, { prefix: '/documents' });
 await app.register(updateStatusDocumentRoute, { prefix: '/documents/sign' });
@@ -75,7 +77,7 @@ await app.register(deleteDocumentRoute, { prefix: '/documents' });
 await app.register(updateDocumentRoute, { prefix: '/documents' });
 try {
   await app.listen({
-    port: Number(process.env.PORT) || 8080
+    port: Number(process.env.PORT) || 8080,
   });
 } catch (err) {
   app.log.error(err);

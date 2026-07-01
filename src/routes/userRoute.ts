@@ -6,12 +6,18 @@ import {
   GetUserByCpfRepository,
   GetUserByEmailRepository,
   GetUserByIdRepository,
+  UpdateUserRepository,
 } from '../repositories/index.js';
-import { CreateUserUseCase, GetUserByIdUseCase } from '../use-cases/index.js';
+import {
+  CreateUserUseCase,
+  GetUserByIdUseCase,
+  UpdateUserUseCase,
+} from '../use-cases/index.js';
 import {
   CreateUserSchema,
   ErrorSchema,
   ZodErrorSchema,
+  UpdateUserSchema,
   ResponseUserSuccessSchema,
 } from '../schemas/index.js';
 
@@ -62,6 +68,43 @@ export const getUserByIdRoute = async (app: FastifyInstance) => {
       const getUserByIdRepository = new GetUserByIdRepository();
       const getUserByIdUseCase = new GetUserByIdUseCase(getUserByIdRepository);
       const result = await getUserByIdUseCase.execute(request.params.id);
+      return reply.status(200).send(result);
+    },
+  });
+};
+
+export const updateUserRoute = async (app: FastifyInstance) => {
+  app.withTypeProvider<ZodTypeProvider>().route({
+    method: 'PATCH',
+    url: '/:id',
+    schema: {
+      tags: ['User'],
+      params: z.object({
+        id: z.uuid(),
+      }),
+      body: UpdateUserSchema,
+      response: {
+        200: ResponseUserSuccessSchema,
+        400: ZodErrorSchema,
+        404: ErrorSchema,
+        500: ErrorSchema,
+      },
+    },
+    handler: async (request, reply) => {
+      const updateUserRepository = new UpdateUserRepository();
+      const getUserByIdRepository = new GetUserByIdRepository();
+      const getUserByEmailRepository = new GetUserByEmailRepository();
+      const getUserByCpfRepository = new GetUserByCpfRepository();
+      const updateUserUseCase = new UpdateUserUseCase(
+        updateUserRepository,
+        getUserByIdRepository,
+        getUserByEmailRepository,
+        getUserByCpfRepository
+      );
+      const result = await updateUserUseCase.execute(
+        request.params.id,
+        request.body
+      );
       return reply.status(200).send(result);
     },
   });
