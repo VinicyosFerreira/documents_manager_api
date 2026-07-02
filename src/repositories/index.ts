@@ -9,3 +9,4 @@ export * from './user/GetUserByEmail.js';
 export * from './user/GetUserByCpf.js';
 export * from './user/GetUserById.js';
 export * from './user/UpdateUser.js';
+export * from './user/DeleteUser.js';
