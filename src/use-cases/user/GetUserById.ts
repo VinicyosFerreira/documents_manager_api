@@ -9,12 +9,12 @@ export class GetUserByIdUseCase {
   }
 
   async execute(id: string): Promise<UserOutputDTO> {
-    const result = await this.getUserByIdRepository.execute(id);
+    const getUserById = await this.getUserByIdRepository.execute(id);
 
-    if (!result) {
+    if (!getUserById || getUserById.deletedAt) {
       throw new UserNotFoundError();
     }
 
-    return result;
+    return getUserById;
   }
 }

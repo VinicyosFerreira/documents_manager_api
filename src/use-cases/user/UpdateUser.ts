@@ -50,7 +50,7 @@ export class UpdateUserUseCase {
     userData: UserUpdateInputDTO
   ): Promise<UserOutputDTO> {
     const getUserById = await this.getUserByIdRepository.execute(userId);
-    if (!getUserById) {
+    if (!getUserById || getUserById.deletedAt) {
       throw new UserNotFoundError();
     }
 
