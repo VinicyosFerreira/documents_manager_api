@@ -5,12 +5,17 @@ import {
 } from 'fastify-type-provider-zod';
 import {
   createDocumentRoute,
-  deleteDocumentRoute,
   getDocumentsRoute,
   updateStatusDocumentRoute,
   updateDocumentRoute,
+  deleteDocumentRoute,
 } from './routes/documentRoute.js';
-import { createUserRoute, getUserByIdRoute , updateUserRoute} from './routes/userRoute.js';
+import {
+  createUserRoute,
+  deleteUserRoute,
+  getUserByIdRoute,
+  updateUserRoute,
+} from './routes/userRoute.js';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
 import { errorHandler } from './errors/error-handler.js';
@@ -67,14 +72,20 @@ await app.register(fastifySwaggerUi, {
 });
 
 app.setErrorHandler(errorHandler);
+
+// User routes
 await app.register(getUserByIdRoute, { prefix: '/users' });
 await app.register(createUserRoute, { prefix: '/users' });
 await app.register(updateUserRoute, { prefix: '/users' });
+await app.register(deleteUserRoute, { prefix: '/users' });
+
+// Document routes
 await app.register(getDocumentsRoute, { prefix: '/documents' });
 await app.register(createDocumentRoute, { prefix: '/documents' });
 await app.register(updateStatusDocumentRoute, { prefix: '/documents/sign' });
 await app.register(deleteDocumentRoute, { prefix: '/documents' });
 await app.register(updateDocumentRoute, { prefix: '/documents' });
+
 try {
   await app.listen({
     port: Number(process.env.PORT) || 8080,

@@ -40,3 +40,7 @@ export const ResponseUserSuccessSchema = z.object({
   email: z.string().trim().min(1),
   createdAt: z.date(),
 });
+
+export const ResponseDeleteUserSuccessSchema = z.object({
+  message: z.string(),
+});

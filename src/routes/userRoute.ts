@@ -7,11 +7,13 @@ import {
   GetUserByEmailRepository,
   GetUserByIdRepository,
   UpdateUserRepository,
+  DeleteUserRepository,
 } from '../repositories/index.js';
 import {
   CreateUserUseCase,
   GetUserByIdUseCase,
   UpdateUserUseCase,
+  DeleteUserUseCase,
 } from '../use-cases/index.js';
 import {
   CreateUserSchema,
@@ -19,6 +21,7 @@ import {
   ZodErrorSchema,
   UpdateUserSchema,
   ResponseUserSuccessSchema,
+  ResponseDeleteUserSuccessSchema,
 } from '../schemas/index.js';
 
 export const createUserRoute = async (app: FastifyInstance) => {
@@ -106,6 +109,37 @@ export const updateUserRoute = async (app: FastifyInstance) => {
         request.body
       );
       return reply.status(200).send(result);
+    },
+  });
+};
+
+export const deleteUserRoute = async (app: FastifyInstance) => {
+  app.withTypeProvider<ZodTypeProvider>().route({
+    method: 'DELETE',
+    url: '/:id',
+    schema: {
+      tags: ['User'],
+      params: z.object({
+        id: z.uuid(),
+      }),
+      response: {
+        200: ResponseDeleteUserSuccessSchema,
+        400: ZodErrorSchema,
+        404: ErrorSchema,
+        500: ErrorSchema,
+      },
+    },
+    handler: async (request, reply) => {
+      const deleteUserRepository = new DeleteUserRepository();
+      const getUserByIdRepository = new GetUserByIdRepository();
+      const deleteUserUseCase = new DeleteUserUseCase(
+        deleteUserRepository,
+        getUserByIdRepository
+      );
+      await deleteUserUseCase.execute(request.params.id);
+      return reply
+        .status(200)
+        .send({ message: 'Usuário deletado com sucesso' });
     },
   });
 };
