@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import Fastify from 'fastify';
 import {
   serializerCompiler,
@@ -15,6 +16,7 @@ import {
   deleteUserRoute,
   getUserByIdRoute,
   updateUserRoute,
+  loginUserRoute,
 } from './routes/userRoute.js';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
@@ -22,6 +24,8 @@ import { errorHandler } from './errors/error-handler.js';
 import { jsonSchemaTransform } from 'fastify-type-provider-zod';
 import fastifyCors from '@fastify/cors';
 import fastifyMultipart from '@fastify/multipart';
+import fastifyJwt from '@fastify/jwt';
+import verifyToken from './hooks/verifyToken.js';
 
 const app = Fastify({
   logger: true,
@@ -29,6 +33,13 @@ const app = Fastify({
 
 app.register(fastifyCors, {
   origin: ['http://localhost:3000'],
+});
+
+app.register(fastifyJwt, {
+  secret: process.env.JWT_SECRET || '',
+  sign: {
+    expiresIn: '30m',
+  },
 });
 
 app.register(fastifyMultipart, {
@@ -73,18 +84,28 @@ await app.register(fastifySwaggerUi, {
 
 app.setErrorHandler(errorHandler);
 
-// User routes
-await app.register(getUserByIdRoute, { prefix: '/users' });
+// Public routes to register/login
+await app.register(loginUserRoute, { prefix: '/login' });
 await app.register(createUserRoute, { prefix: '/users' });
-await app.register(updateUserRoute, { prefix: '/users' });
-await app.register(deleteUserRoute, { prefix: '/users' });
 
-// Document routes
-await app.register(getDocumentsRoute, { prefix: '/documents' });
-await app.register(createDocumentRoute, { prefix: '/documents' });
-await app.register(updateStatusDocumentRoute, { prefix: '/documents/sign' });
-await app.register(deleteDocumentRoute, { prefix: '/documents' });
-await app.register(updateDocumentRoute, { prefix: '/documents' });
+// Private routes
+app.register(async (privateRoute) => {
+  await verifyToken(privateRoute);
+
+  // users route
+  await privateRoute.register(getUserByIdRoute, { prefix: '/users' });
+  await privateRoute.register(updateUserRoute, { prefix: '/users' });
+  await privateRoute.register(deleteUserRoute, { prefix: '/users' });
+
+  // documents route
+  await privateRoute.register(getDocumentsRoute, { prefix: '/documents' });
+  await privateRoute.register(createDocumentRoute, { prefix: '/documents' });
+  await privateRoute.register(updateStatusDocumentRoute, {
+    prefix: '/documents/sign',
+  });
+  await privateRoute.register(deleteDocumentRoute, { prefix: '/documents' });
+  await privateRoute.register(updateDocumentRoute, { prefix: '/documents' });
+});
 
 try {
   await app.listen({
