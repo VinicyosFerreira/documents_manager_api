@@ -8,3 +8,4 @@ export * from './user/CreateUser.js';
 export * from './user/GetUserById.js';
 export * from './user/UpdateUser.js';
 export * from './user/DeleteUser.js';
+export * from './user/LoginUser.js';
