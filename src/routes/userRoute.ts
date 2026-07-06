@@ -2,27 +2,54 @@ import { FastifyInstance } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import z from 'zod';
 import {
-  CreateUserRepository,
-  GetUserByCpfRepository,
-  GetUserByEmailRepository,
-  GetUserByIdRepository,
-  UpdateUserRepository,
-  DeleteUserRepository,
-} from '../repositories/index.js';
-import {
-  CreateUserUseCase,
-  GetUserByIdUseCase,
-  UpdateUserUseCase,
-  DeleteUserUseCase,
-} from '../use-cases/index.js';
-import {
   CreateUserSchema,
   ErrorSchema,
   ZodErrorSchema,
   UpdateUserSchema,
   ResponseUserSuccessSchema,
   ResponseDeleteUserSuccessSchema,
+  LoginUserSchema,
+  LoginUserResponseSchema,
 } from '../schemas/index.js';
+import {
+  makeCreateUser,
+  makeLoginUser,
+  makeGetUserById,
+  makeUpdateUser,
+  makeDeleteUser,
+} from '../factories/index.js';
+
+export const loginUserRoute = async (app: FastifyInstance) => {
+  app.withTypeProvider<ZodTypeProvider>().route({
+    method: 'POST',
+    url: '/',
+    schema: {
+      tags: ['User'],
+      body: LoginUserSchema,
+      response: {
+        200: LoginUserResponseSchema,
+        400: ZodErrorSchema,
+        500: ErrorSchema,
+      },
+    },
+    handler: async (request, reply) => {
+      const loginUserUseCase = makeLoginUser();
+      const result = await loginUserUseCase.execute(
+        request.body.email,
+        request.body.password
+      );
+
+      const token = app.jwt.sign({ id: result.id, email: result.email });
+
+      const payload = {
+        user: result,
+        token,
+      };
+
+      return reply.status(200).send(payload);
+    },
+  });
+};
 
 export const createUserRoute = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({
@@ -38,14 +65,7 @@ export const createUserRoute = async (app: FastifyInstance) => {
       },
     },
     handler: async (request, reply) => {
-      const createUserRepository = new CreateUserRepository();
-      const getUserByEmailRepository = new GetUserByEmailRepository();
-      const getUserByCpfRepository = new GetUserByCpfRepository();
-      const createUserUseCase = new CreateUserUseCase(
-        createUserRepository,
-        getUserByEmailRepository,
-        getUserByCpfRepository
-      );
+      const createUserUseCase = makeCreateUser();
       const result = await createUserUseCase.execute(request.body);
       return reply.status(201).send(result);
     },
@@ -55,12 +75,9 @@ export const createUserRoute = async (app: FastifyInstance) => {
 export const getUserByIdRoute = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({
     method: 'GET',
-    url: '/:id',
+    url: '/me',
     schema: {
       tags: ['User'],
-      params: z.object({
-        id: z.uuid(),
-      }),
       response: {
         200: ResponseUserSuccessSchema,
         400: ZodErrorSchema,
@@ -68,9 +85,12 @@ export const getUserByIdRoute = async (app: FastifyInstance) => {
       },
     },
     handler: async (request, reply) => {
-      const getUserByIdRepository = new GetUserByIdRepository();
-      const getUserByIdUseCase = new GetUserByIdUseCase(getUserByIdRepository);
-      const result = await getUserByIdUseCase.execute(request.params.id);
+      const getUserByIdUseCase = makeGetUserById();
+
+      const userId = request.user.id;
+      console.log(userId);
+
+      const result = await getUserByIdUseCase.execute(userId);
       return reply.status(200).send(result);
     },
   });
@@ -94,16 +114,7 @@ export const updateUserRoute = async (app: FastifyInstance) => {
       },
     },
     handler: async (request, reply) => {
-      const updateUserRepository = new UpdateUserRepository();
-      const getUserByIdRepository = new GetUserByIdRepository();
-      const getUserByEmailRepository = new GetUserByEmailRepository();
-      const getUserByCpfRepository = new GetUserByCpfRepository();
-      const updateUserUseCase = new UpdateUserUseCase(
-        updateUserRepository,
-        getUserByIdRepository,
-        getUserByEmailRepository,
-        getUserByCpfRepository
-      );
+      const updateUserUseCase = makeUpdateUser();
       const result = await updateUserUseCase.execute(
         request.params.id,
         request.body
@@ -130,12 +141,7 @@ export const deleteUserRoute = async (app: FastifyInstance) => {
       },
     },
     handler: async (request, reply) => {
-      const deleteUserRepository = new DeleteUserRepository();
-      const getUserByIdRepository = new GetUserByIdRepository();
-      const deleteUserUseCase = new DeleteUserUseCase(
-        deleteUserRepository,
-        getUserByIdRepository
-      );
+      const deleteUserUseCase = makeDeleteUser();
       await deleteUserUseCase.execute(request.params.id);
       return reply
         .status(200)
