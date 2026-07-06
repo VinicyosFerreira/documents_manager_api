@@ -44,3 +44,22 @@ export const ResponseUserSuccessSchema = z.object({
 export const ResponseDeleteUserSuccessSchema = z.object({
   message: z.string(),
 });
+
+export const LoginUserSchema = z.object({
+  email: z
+    .email({
+      error: 'O email é inválido',
+    })
+    .trim()
+    .min(1, {
+      error: 'O email é obrigatório',
+    }),
+  password: z.string().trim().min(8, {
+    error: 'A senha precisa ter no mínimo 8 caracteres',
+  }),
+});
+
+export const LoginUserResponseSchema = z.object({
+  token: z.string(),
+  user: ResponseUserSuccessSchema,
+});
