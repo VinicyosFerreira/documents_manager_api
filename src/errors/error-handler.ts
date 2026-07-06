@@ -6,6 +6,7 @@ import {
   CpfAlreadyExistError,
   EmailAlreadyExistsError,
   UserNotFoundError,
+  UnauthorizedError,
 } from './index.js';
 
 export const errorHandler = (
@@ -25,6 +26,13 @@ export const errorHandler = (
     return reply.status(400).send({
       error: 'Há parâmetros inválidos ou faltante na requisição',
       code: 'BAD_REQUEST',
+    });
+  }
+
+  if (error instanceof UnauthorizedError) {
+    return reply.status(401).send({
+      error: 'Usuário não autorizado',
+      code: 'UNAUTHORIZED',
     });
   }
 
