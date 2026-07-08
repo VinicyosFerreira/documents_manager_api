@@ -1,6 +1,5 @@
 import { FastifyInstance } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
-import z from 'zod';
 import {
   CreateUserSchema,
   ErrorSchema,
@@ -75,7 +74,7 @@ export const createUserRoute = async (app: FastifyInstance) => {
 export const getUserByIdRoute = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({
     method: 'GET',
-    url: '/me',
+    url: '/',
     schema: {
       tags: ['User'],
       response: {
@@ -86,10 +85,7 @@ export const getUserByIdRoute = async (app: FastifyInstance) => {
     },
     handler: async (request, reply) => {
       const getUserByIdUseCase = makeGetUserById();
-
       const userId = request.user.id;
-      console.log(userId);
-
       const result = await getUserByIdUseCase.execute(userId);
       return reply.status(200).send(result);
     },
@@ -99,12 +95,9 @@ export const getUserByIdRoute = async (app: FastifyInstance) => {
 export const updateUserRoute = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({
     method: 'PATCH',
-    url: '/:id',
+    url: '/',
     schema: {
       tags: ['User'],
-      params: z.object({
-        id: z.uuid(),
-      }),
       body: UpdateUserSchema,
       response: {
         200: ResponseUserSuccessSchema,
@@ -115,10 +108,8 @@ export const updateUserRoute = async (app: FastifyInstance) => {
     },
     handler: async (request, reply) => {
       const updateUserUseCase = makeUpdateUser();
-      const result = await updateUserUseCase.execute(
-        request.params.id,
-        request.body
-      );
+      const userId = request.user.id;
+      const result = await updateUserUseCase.execute(userId, request.body);
       return reply.status(200).send(result);
     },
   });
@@ -130,9 +121,6 @@ export const deleteUserRoute = async (app: FastifyInstance) => {
     url: '/:id',
     schema: {
       tags: ['User'],
-      params: z.object({
-        id: z.uuid(),
-      }),
       response: {
         200: ResponseDeleteUserSuccessSchema,
         400: ZodErrorSchema,
@@ -142,7 +130,8 @@ export const deleteUserRoute = async (app: FastifyInstance) => {
     },
     handler: async (request, reply) => {
       const deleteUserUseCase = makeDeleteUser();
-      await deleteUserUseCase.execute(request.params.id);
+      const userId = request.user.id;
+      await deleteUserUseCase.execute(userId);
       return reply
         .status(200)
         .send({ message: 'Usuário deletado com sucesso' });

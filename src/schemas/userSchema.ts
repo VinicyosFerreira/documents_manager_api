@@ -7,7 +7,7 @@ const validateCpf = (value: string) => {
 
 export const CreateUserSchema = z.object({
   name: z.string().trim().min(1, {
-    error: 'O nome e obrigatório',
+    error: 'O nome é obrigatório',
   }),
   cpf: z
     .string()
