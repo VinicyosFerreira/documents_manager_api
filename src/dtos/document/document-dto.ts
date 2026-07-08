@@ -1,14 +1,10 @@
 import { Status } from '../../../generated/prisma/enums.js';
-import { MultipartFile } from '@fastify/multipart';
 
 export interface CreateDocumentInputDTO {
-  title: {
-    value: string;
-  };
-  description: {
-    value: string;
-  };
-  file: MultipartFile;
+  title: string;
+  description: string;
+  userId: string;
+  file: Buffer;
 }
 
 export type CreateDocumentRepositoryDTO = Omit<
@@ -25,6 +21,7 @@ export type UpdateDocumentInputDTO = Partial<
 export interface DocumentOutputDTO {
   id: string;
   title: string;
+  userId: string;
   documentUrl: string;
   description: string;
   status: Status;

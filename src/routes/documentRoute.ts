@@ -3,7 +3,7 @@ import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import z from 'zod';
 import {
   CreateDocumentUseCase,
-  GetDocumentsUseCase,
+  GetDocumentsByUserIdUseCase,
   UpdateStatusDocumentUseCase,
   DeleteDocumentUseCase,
   UpdateDocumentUseCase,
@@ -12,10 +12,11 @@ import {
 import {
   CreateDocumentRepository,
   GetDocumentByIdRepository,
-  GetDocumentsRepository,
+  GetDocumentsByUserIdRepository,
   UpdateStatusDocumentRepository,
   DeleteDocumentRepository,
   UpdateDocumentRepository,
+  GetUserByIdRepository,
 } from '../repositories/index.js';
 import {
   CreateDocumentSchema,
@@ -31,6 +32,7 @@ export const createDocumentRoute = async (app: FastifyInstance) => {
     method: 'POST',
     url: '/',
     schema: {
+      consumes: ['multipart/form-data'],
       body: CreateDocumentSchema,
       tags: ['Document'],
       response: {
@@ -42,14 +44,16 @@ export const createDocumentRoute = async (app: FastifyInstance) => {
     handler: async (request, reply) => {
       const createDocumentRepository = new CreateDocumentRepository();
       const uploadStorageUseCase = new UploadStorageUseCase();
+      const getUserByIdRepository = new GetUserByIdRepository();
       const createDocumentUseCase = new CreateDocumentUseCase(
         createDocumentRepository,
-        uploadStorageUseCase
+        uploadStorageUseCase,
+        getUserByIdRepository
       );
+      const userId = request.user.id;
+      const { title, description, file } = request.body;
 
-      const file = request.body.file;
-
-      if (!file || file.mimetype !== 'application/pdf') {
+      if (!file || file.subarray(0, 4).toString() !== '%PDF') {
         return reply.status(400).send({
           code: 'BAD_REQUEST',
           error: 'Arquivo inválido, obrigatoriamente PDF',
@@ -57,7 +61,9 @@ export const createDocumentRoute = async (app: FastifyInstance) => {
       }
 
       const result = await createDocumentUseCase.execute({
-        ...request.body,
+        title,
+        description,
+        userId,
         file,
       });
       return reply.status(201).send(result);
@@ -76,14 +82,18 @@ export const getDocumentsRoute = async (app: FastifyInstance) => {
         500: ErrorSchema,
       },
     },
-    handler: async (_, reply) => {
-      const getDocumentsRepository = new GetDocumentsRepository();
+    handler: async (request, reply) => {
+      const getDocumentsByUserIdRepository =
+        new GetDocumentsByUserIdRepository();
       const uploadStorageUseCase = new UploadStorageUseCase();
-      const getDocumentsUseCase = new GetDocumentsUseCase(
-        getDocumentsRepository,
-        uploadStorageUseCase
+      const getUserByIdRepository = new GetUserByIdRepository();
+      const getDocumentsByUserIdUseCase = new GetDocumentsByUserIdUseCase(
+        getDocumentsByUserIdRepository,
+        uploadStorageUseCase,
+        getUserByIdRepository
       );
-      const result = await getDocumentsUseCase.execute();
+      const userId = request.user.id;
+      const result = await getDocumentsByUserIdUseCase.execute(userId);
       return reply.status(200).send(result);
     },
   });
@@ -94,6 +104,7 @@ export const updateDocumentRoute = async (app: FastifyInstance) => {
     method: 'PATCH',
     url: '/:id',
     schema: {
+      consumes: ['multipart/form-data'],
       params: z.object({
         id: z.uuid(),
       }),
@@ -116,8 +127,9 @@ export const updateDocumentRoute = async (app: FastifyInstance) => {
         uploadStorageUseCase
       );
       const file = request.body.file;
+      const userId = request.user.id;
 
-      if (file && file.mimetype !== 'application/pdf') {
+      if (!file || file.subarray(0, 4).toString() !== '%PDF') {
         return reply.status(400).send({
           code: 'BAD_REQUEST',
           error: 'Arquivo inválido, obrigatoriamente PDF',
@@ -131,6 +143,7 @@ export const updateDocumentRoute = async (app: FastifyInstance) => {
 
       const result = await updateDocumentUseCase.execute(
         request.params.id,
+        userId,
         data
       );
       return reply.status(200).send(result);

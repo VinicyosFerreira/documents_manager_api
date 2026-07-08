@@ -7,6 +7,7 @@ import {
   EmailAlreadyExistsError,
   UserNotFoundError,
   UnauthorizedError,
+  CannotPermissionToEditDocument,
 } from './index.js';
 
 export const errorHandler = (
@@ -14,7 +15,13 @@ export const errorHandler = (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
-  request.log.error(error);
+  if (error instanceof UnauthorizedError) {
+    return reply.status(401).send({
+      error: 'Usuário não autorizado',
+      code: 'UNAUTHORIZED',
+    });
+  }
+
   if (hasZodFastifySchemaValidationErrors(error)) {
     if (error.validationContext === 'body') {
       return reply.status(400).send({
@@ -26,13 +33,6 @@ export const errorHandler = (
     return reply.status(400).send({
       error: 'Há parâmetros inválidos ou faltante na requisição',
       code: 'BAD_REQUEST',
-    });
-  }
-
-  if (error instanceof UnauthorizedError) {
-    return reply.status(401).send({
-      error: 'Usuário não autorizado',
-      code: 'UNAUTHORIZED',
     });
   }
 
@@ -54,6 +54,13 @@ export const errorHandler = (
     return reply.status(404).send({
       error: 'Usuário não encontrado',
       code: 'NOT_FOUND',
+    });
+  }
+
+  if (error instanceof CannotPermissionToEditDocument) {
+    return reply.status(403).send({
+      error: 'Usuário sem permissão para editar o documento',
+      code: 'FORBIDDEN',
     });
   }
 

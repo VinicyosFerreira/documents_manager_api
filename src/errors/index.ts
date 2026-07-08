@@ -39,3 +39,10 @@ export class UserNotFoundError extends Error {
     this.name = 'UserNotFoundError';
   }
 }
+
+export class CannotPermissionToEditDocument extends Error {
+  constructor() {
+    super('Cannot permission to edit document');
+    this.name = 'CannotPermissionToEditDocument';
+  }
+}

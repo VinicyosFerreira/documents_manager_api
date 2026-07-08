@@ -46,7 +46,7 @@ app.register(fastifyMultipart, {
   limits: {
     fileSize: 5 * 1024 * 1024,
   },
-  attachFieldsToBody: true,
+  attachFieldsToBody: "keyValues",
 });
 
 app.setValidatorCompiler(validatorCompiler);
@@ -93,13 +93,13 @@ app.register(async (privateRoute) => {
   await verifyToken(privateRoute);
 
   // users route
-  await privateRoute.register(getUserByIdRoute, { prefix: '/users' });
-  await privateRoute.register(updateUserRoute, { prefix: '/users' });
-  await privateRoute.register(deleteUserRoute, { prefix: '/users' });
+  await privateRoute.register(getUserByIdRoute, { prefix: '/users/me' });
+  await privateRoute.register(updateUserRoute, { prefix: '/users/me' });
+  await privateRoute.register(deleteUserRoute, { prefix: '/users/me' });
 
   // documents route
-  await privateRoute.register(getDocumentsRoute, { prefix: '/documents' });
-  await privateRoute.register(createDocumentRoute, { prefix: '/documents' });
+  await privateRoute.register(getDocumentsRoute, { prefix: '/documents/me' });
+  await privateRoute.register(createDocumentRoute, { prefix: '/documents/me' });
   await privateRoute.register(updateStatusDocumentRoute, {
     prefix: '/documents/sign',
   });

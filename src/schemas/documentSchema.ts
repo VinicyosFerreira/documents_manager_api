@@ -1,24 +1,31 @@
 import z from 'zod';
-import { MultipartFile } from '@fastify/multipart';
-
 export const CreateDocumentSchema = z.object({
-  title: z.object({
-    value: z.string().trim().min(1, {
+  title: z
+    .string({
+      error: 'O título é obrigatório',
+    })
+    .trim()
+    .min(1, {
       error: 'O título é obrigatório',
     }),
-  }),
-  description: z.object({
-    value: z.string().trim().min(1, {
-      error: 'A descrição e obrigatorio',
+  description: z
+    .string({
+      error: 'A descrição é obrigatória',
+    })
+    .trim()
+    .min(1, {
+      error: 'A descrição é obrigatória',
     }),
+  file: z.instanceof(Buffer , {
+    error: 'O arquivo é obrigatório',
   }),
-  file: z.custom<MultipartFile>(),
 });
 
 export const UpdateDocumentSchema = CreateDocumentSchema.partial();
 
 export const ResponseDocumentSuccessSchema = z.object({
   id: z.uuid(),
+  userId: z.uuid(),
   title: z.string().trim().min(1),
   description: z.string().trim().min(1),
   documentUrl: z.string(),

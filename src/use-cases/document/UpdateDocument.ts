@@ -7,7 +7,7 @@ import type {
   UpdateDocumentInputDTO,
 } from '../../dtos/index.js';
 import { UploadStorageUseCase } from '../index.js';
-import { DocumentNotFoundError } from '../../errors/index.js';
+import { DocumentNotFoundError, CannotPermissionToEditDocument } from '../../errors/index.js';
 
 export class UpdateDocumentUseCase {
   private updateDocumentRepository: UpdateDocumentRepository;
@@ -24,13 +24,19 @@ export class UpdateDocumentUseCase {
   }
 
   async execute(
-    id: string,
+    documentId: string,
+    userId: string,
     data: UpdateDocumentInputDTO
   ): Promise<DocumentOutputDTO> {
-    const documentById = await this.getDocumentByIdRepository.execute(id);
+    const documentById =
+      await this.getDocumentByIdRepository.execute(documentId);
 
     if (!documentById) {
       throw new DocumentNotFoundError();
+    }
+
+    if (documentById.id !== userId) {
+      throw new CannotPermissionToEditDocument();
     }
 
     if (data.file && documentById.status === 'SIGNED') {
@@ -42,10 +48,13 @@ export class UpdateDocumentUseCase {
       const savedDocument = await this.uploadStorageUseCase.saveDocument(
         data.file
       );
-      const updatedDocument = await this.updateDocumentRepository.execute(id, {
-        ...data,
-        documentKey: savedDocument.document_key,
-      });
+      const updatedDocument = await this.updateDocumentRepository.execute(
+        documentId,
+        {
+          ...data,
+          documentKey: savedDocument.document_key,
+        }
+      );
 
       const signedDocument = await this.uploadStorageUseCase.generateSignedUrl(
         updatedDocument.documentKey
@@ -55,7 +64,7 @@ export class UpdateDocumentUseCase {
     }
 
     const updatedDocument = await this.updateDocumentRepository.execute(
-      id,
+      documentId,
       data
     );
 

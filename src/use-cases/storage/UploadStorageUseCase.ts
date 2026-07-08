@@ -6,7 +6,7 @@ import {
   DeleteObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { MultipartFile } from '@fastify/multipart';
+import crypto from 'node:crypto';
 
 export class UploadStorageUseCase {
   private s3Client: S3Client;
@@ -21,14 +21,14 @@ export class UploadStorageUseCase {
       forcePathStyle: true,
     });
   }
-  async saveDocument(file: MultipartFile) {
-    const uniqueFileName = new Date().getTime() + '-' + file.filename;
+  async saveDocument(file: Buffer) {
+    const uniqueFileName = crypto.randomUUID() + '.pdf';
 
     const save = new PutObjectCommand({
       Bucket: 'documents',
       Key: uniqueFileName,
-      Body: await file.toBuffer(),
-      ContentType: file.mimetype,
+      Body: file,
+      ContentType: 'application/pdf',
     });
 
     try {
