@@ -8,9 +8,9 @@ export class UpdateDocumentRepository {
                 id: id,
             },
             data: {
-                title: data.title?.value,
-                description: data.description?.value,
-                documentKey: data?.documentKey
+                title: data.title,
+                description: data.description,
+                documentKey: data.documentKey
             },
         });
     }

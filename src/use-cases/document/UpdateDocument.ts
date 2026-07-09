@@ -35,13 +35,15 @@ export class UpdateDocumentUseCase {
       throw new DocumentNotFoundError();
     }
 
-    if (documentById.id !== userId) {
+    if (documentById.userId !== userId) {
       throw new CannotPermissionToEditDocument();
     }
 
     if (data.file && documentById.status === 'SIGNED') {
       throw new DocumentNotFoundError();
     }
+
+  
 
     if (data.file) {
       await this.uploadStorageUseCase.deleteDocument(documentById.documentKey);
