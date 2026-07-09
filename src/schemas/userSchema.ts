@@ -31,7 +31,9 @@ export const CreateUserSchema = z.object({
   }),
 });
 
-export const UpdateUserSchema = CreateUserSchema.partial();
+export const UpdateUserSchema = CreateUserSchema.omit({
+  password: true,
+}).partial();
 
 export const ResponseUserSuccessSchema = z.object({
   id: z.uuid(),
