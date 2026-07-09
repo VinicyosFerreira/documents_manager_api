@@ -2,23 +2,6 @@ import { FastifyInstance } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import z from 'zod';
 import {
-  CreateDocumentUseCase,
-  GetDocumentsByUserIdUseCase,
-  UpdateStatusDocumentUseCase,
-  DeleteDocumentUseCase,
-  UpdateDocumentUseCase,
-  UploadStorageUseCase,
-} from '../use-cases/index.js';
-import {
-  CreateDocumentRepository,
-  GetDocumentByIdRepository,
-  GetDocumentsByUserIdRepository,
-  UpdateStatusDocumentRepository,
-  DeleteDocumentRepository,
-  UpdateDocumentRepository,
-  GetUserByIdRepository,
-} from '../repositories/index.js';
-import {
   CreateDocumentSchema,
   ErrorSchema,
   UpdateDocumentSchema,
@@ -26,6 +9,13 @@ import {
   ResponseDocumentSuccessSchema,
   ZodErrorSchema,
 } from '../schemas/index.js';
+import {
+  makeCreateDocument,
+  makeDeleteDocument,
+  makeGetDocumentsByUserId,
+  makeUpdateDocument,
+  makeUpdateDocumentStatus,
+} from '../factories/index.js';
 
 export const createDocumentRoute = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({
@@ -42,14 +32,7 @@ export const createDocumentRoute = async (app: FastifyInstance) => {
       },
     },
     handler: async (request, reply) => {
-      const createDocumentRepository = new CreateDocumentRepository();
-      const uploadStorageUseCase = new UploadStorageUseCase();
-      const getUserByIdRepository = new GetUserByIdRepository();
-      const createDocumentUseCase = new CreateDocumentUseCase(
-        createDocumentRepository,
-        uploadStorageUseCase,
-        getUserByIdRepository
-      );
+      const createDocumentUseCase = makeCreateDocument();
       const userId = request.user.id;
       const { title, description, file } = request.body;
 
@@ -83,15 +66,7 @@ export const getDocumentsRoute = async (app: FastifyInstance) => {
       },
     },
     handler: async (request, reply) => {
-      const getDocumentsByUserIdRepository =
-        new GetDocumentsByUserIdRepository();
-      const uploadStorageUseCase = new UploadStorageUseCase();
-      const getUserByIdRepository = new GetUserByIdRepository();
-      const getDocumentsByUserIdUseCase = new GetDocumentsByUserIdUseCase(
-        getDocumentsByUserIdRepository,
-        uploadStorageUseCase,
-        getUserByIdRepository
-      );
+      const getDocumentsByUserIdUseCase = makeGetDocumentsByUserId();
       const userId = request.user.id;
       const result = await getDocumentsByUserIdUseCase.execute(userId);
       return reply.status(200).send(result);
@@ -118,14 +93,7 @@ export const updateDocumentRoute = async (app: FastifyInstance) => {
       },
     },
     handler: async (request, reply) => {
-      const updateDocumentRepository = new UpdateDocumentRepository();
-      const getDocumentByIdRepository = new GetDocumentByIdRepository();
-      const uploadStorageUseCase = new UploadStorageUseCase();
-      const updateDocumentUseCase = new UpdateDocumentUseCase(
-        updateDocumentRepository,
-        getDocumentByIdRepository,
-        uploadStorageUseCase
-      );
+      const updateDocumentUseCase = makeUpdateDocument();
       const file = request.body.file;
       const userId = request.user.id;
 
@@ -169,15 +137,7 @@ export const updateStatusDocumentRoute = async (app: FastifyInstance) => {
       },
     },
     handler: async (request, reply) => {
-      const updateStatusDocumentRepository =
-        new UpdateStatusDocumentRepository();
-      const getDocumentByIdRepository = new GetDocumentByIdRepository();
-      const uploadStorageUseCase = new UploadStorageUseCase();
-      const updateStatusDocumentUseCase = new UpdateStatusDocumentUseCase(
-        updateStatusDocumentRepository,
-        getDocumentByIdRepository,
-        uploadStorageUseCase
-      );
+      const updateStatusDocumentUseCase = makeUpdateDocumentStatus();
       const userId = request.user.id;
       const result = await updateStatusDocumentUseCase.execute(
         request.params.id,
@@ -205,17 +165,8 @@ export const deleteDocumentRoute = async (app: FastifyInstance) => {
       },
     },
     handler: async (request, reply) => {
-      const deleteDocumentRepository = new DeleteDocumentRepository();
-      const getDocumentByIdRepository = new GetDocumentByIdRepository();
-      const uploadStorageUseCase = new UploadStorageUseCase();
-      const deleteDocumentUseCase = new DeleteDocumentUseCase(
-        deleteDocumentRepository,
-        getDocumentByIdRepository,
-        uploadStorageUseCase
-      );
-
+      const deleteDocumentUseCase = makeDeleteDocument();
       const userId = request.user.id;
-
       await deleteDocumentUseCase.execute(request.params.id, userId);
       return reply.status(200).send({
         message: 'Documento deletado com sucesso',
