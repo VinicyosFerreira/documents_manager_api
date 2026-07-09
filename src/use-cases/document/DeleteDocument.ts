@@ -1,4 +1,7 @@
-import { DocumentNotFoundError } from '../../errors/index.js';
+import {
+  DocumentNotFoundError,
+  CannotPermissionToEditDocument,
+} from '../../errors/index.js';
 import { DeleteDocumentRepository } from '../../repositories/document/DeleteDocument.js';
 import { GetDocumentByIdRepository } from '../../repositories/document/GetDocumentById.js';
 import { UploadStorageUseCase } from '../index.js';
@@ -13,15 +16,20 @@ export class DeleteDocumentUseCase {
     this.getDocumentByIdRepository = getDocumentByIdRepository;
     this.uploadStorageUseCase = uploadStorageUseCase;
   }
-  async execute(id: string): Promise<void> {
-    const documentById = await this.getDocumentByIdRepository.execute(id);
+  async execute(documentId: string, userid: string): Promise<void> {
+    const documentById =
+      await this.getDocumentByIdRepository.execute(documentId);
 
     if (!documentById) {
       throw new DocumentNotFoundError();
     }
 
+    if (documentById.userId !== userid) {
+      throw new CannotPermissionToEditDocument();
+    }
+
     await this.uploadStorageUseCase.deleteDocument(documentById.documentKey);
 
-    await this.deleteDocumentRepository.execute(id);
+    await this.deleteDocumentRepository.execute(documentId);
   }
 }

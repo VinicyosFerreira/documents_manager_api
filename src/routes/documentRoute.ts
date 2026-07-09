@@ -129,7 +129,7 @@ export const updateDocumentRoute = async (app: FastifyInstance) => {
       const file = request.body.file;
       const userId = request.user.id;
 
-      if (!file || file.subarray(0, 4).toString() !== '%PDF') {
+      if (file && file.subarray(0, 4).toString() !== '%PDF') {
         return reply.status(400).send({
           code: 'BAD_REQUEST',
           error: 'Arquivo inválido, obrigatoriamente PDF',
@@ -178,8 +178,10 @@ export const updateStatusDocumentRoute = async (app: FastifyInstance) => {
         getDocumentByIdRepository,
         uploadStorageUseCase
       );
+      const userId = request.user.id;
       const result = await updateStatusDocumentUseCase.execute(
-        request.params.id
+        request.params.id,
+        userId
       );
       return reply.status(200).send(result);
     },
@@ -212,7 +214,9 @@ export const deleteDocumentRoute = async (app: FastifyInstance) => {
         uploadStorageUseCase
       );
 
-      await deleteDocumentUseCase.execute(request.params.id);
+      const userId = request.user.id;
+
+      await deleteDocumentUseCase.execute(request.params.id, userId);
       return reply.status(200).send({
         message: 'Documento deletado com sucesso',
       });
