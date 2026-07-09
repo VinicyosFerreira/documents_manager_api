@@ -7,7 +7,11 @@ import type {
   UpdateDocumentInputDTO,
 } from '../../dtos/index.js';
 import { UploadStorageUseCase } from '../index.js';
-import { DocumentNotFoundError, CannotPermissionToEditDocument } from '../../errors/index.js';
+import {
+  DocumentNotFoundError,
+  CannotPermissionToEditDocument,
+  DocumentAlreadySignedError,
+} from '../../errors/index.js';
 
 export class UpdateDocumentUseCase {
   private updateDocumentRepository: UpdateDocumentRepository;
@@ -40,10 +44,8 @@ export class UpdateDocumentUseCase {
     }
 
     if (data.file && documentById.status === 'SIGNED') {
-      throw new DocumentNotFoundError();
+      throw new DocumentAlreadySignedError(documentById.title);
     }
-
-  
 
     if (data.file) {
       await this.uploadStorageUseCase.deleteDocument(documentById.documentKey);

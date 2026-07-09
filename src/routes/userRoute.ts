@@ -118,7 +118,7 @@ export const updateUserRoute = async (app: FastifyInstance) => {
 export const deleteUserRoute = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({
     method: 'DELETE',
-    url: '/:id',
+    url: '/',
     schema: {
       tags: ['User'],
       response: {

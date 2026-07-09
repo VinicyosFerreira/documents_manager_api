@@ -22,7 +22,7 @@ export class GetDocumentsByUserIdUseCase {
   async execute(userId: string): Promise<DocumentOutputDTO[]> {
     const user = await this.getUserByIdRepository.execute(userId);
 
-    if (!user) {
+    if (!user || user.deletedAt) {
       throw new UserNotFoundError();
     }
 
