@@ -17,6 +17,7 @@ import {
   getUserByIdRoute,
   updateUserRoute,
   loginUserRoute,
+  refreshTokenRoute,
 } from './routes/userRoute.js';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
@@ -48,7 +49,7 @@ app.register(fastifyCookie, {
   parseOptions: {
     httpOnly: true,
     secure: false,
-    sameSite: "lax",
+    sameSite: 'lax',
     path: '/',
     signed: true,
   },
@@ -58,7 +59,7 @@ app.register(fastifyMultipart, {
   limits: {
     fileSize: 5 * 1024 * 1024,
   },
-  attachFieldsToBody: "keyValues",
+  attachFieldsToBody: 'keyValues',
 });
 
 app.setValidatorCompiler(validatorCompiler);
@@ -97,8 +98,9 @@ await app.register(fastifySwaggerUi, {
 app.setErrorHandler(errorHandler);
 
 // Public routes to register/login
-await app.register(loginUserRoute, { prefix: '/login' });
+await app.register(loginUserRoute, { prefix: '/auth' });
 await app.register(createUserRoute, { prefix: '/users' });
+await app.register(refreshTokenRoute, { prefix: '/auth' });
 
 // Private routes
 app.register(async (privateRoute) => {
@@ -115,8 +117,8 @@ app.register(async (privateRoute) => {
   await privateRoute.register(updateStatusDocumentRoute, {
     prefix: '/documents/sign',
   });
-  await privateRoute.register(deleteDocumentRoute, { prefix: '/documents' });
-  await privateRoute.register(updateDocumentRoute, { prefix: '/documents' });
+  await privateRoute.register(deleteDocumentRoute, { prefix: '/documents/me' });
+  await privateRoute.register(updateDocumentRoute, { prefix: '/documents/me' });
 });
 
 try {

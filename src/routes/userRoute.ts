@@ -7,6 +7,7 @@ import {
   UpdateUserSchema,
   ResponseUserSuccessSchema,
   ResponseDeleteUserSuccessSchema,
+  RefreshTokenSchema,
   LoginUserSchema,
   LoginUserResponseSchema,
 } from '../schemas/index.js';
@@ -17,11 +18,15 @@ import {
   makeUpdateUser,
   makeDeleteUser,
 } from '../factories/index.js';
+import { UnauthorizedError } from '../errors/index.js';
+import { TokenError } from 'fast-jwt';
+import { throwErrorTokenError } from '../utils/auth.js';
+import { JwtPayload } from '../types/fastify-jwt.js';
 
 export const loginUserRoute = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({
     method: 'POST',
-    url: '/',
+    url: '/login',
     schema: {
       tags: ['User'],
       body: LoginUserSchema,
@@ -38,7 +43,16 @@ export const loginUserRoute = async (app: FastifyInstance) => {
         request.body.password
       );
 
-      const token = app.jwt.sign({ id: result.id, email: result.email });
+      // gerar o access token
+      const token = app.jwt.sign({ id: result.id, email: result.email});
+
+      // gerar o refresh token
+      const refreshToken = app.jwt.sign({ id: result.id }, { expiresIn: '15d' });
+
+      // salvar no cookie
+      reply.setCookie('refreshToken', refreshToken, {
+        maxAge: 15 * 24 * 60 * 60,
+      });
 
       const payload = {
         user: result,
@@ -135,6 +149,58 @@ export const deleteUserRoute = async (app: FastifyInstance) => {
       return reply
         .status(200)
         .send({ message: 'Usuário deletado com sucesso' });
+    },
+  });
+};
+
+export const refreshTokenRoute = async (app: FastifyInstance) => {
+  app.withTypeProvider<ZodTypeProvider>().route({
+    method: 'POST',
+    url: '/refresh',
+    schema: {
+      tags: ['User'],
+      response: {
+        200: RefreshTokenSchema,
+        400: ZodErrorSchema,
+        500: ErrorSchema,
+        401: ErrorSchema,
+      },
+    },
+    handler: async (request, reply) => {
+      const refreshToken = request.cookies.refreshToken;
+
+      if (!refreshToken) {
+        throw new UnauthorizedError();
+      }
+
+      const unsignedCooie = request.unsignCookie(refreshToken);
+
+      if (!unsignedCooie.valid) {
+        throw new UnauthorizedError();
+      }
+
+      try {
+        const validateRefreshToken = app.jwt.verify<JwtPayload>(
+          unsignedCooie.value
+        );
+
+        const accessToken = app.jwt.sign({
+          id: validateRefreshToken.id,
+          email: validateRefreshToken.email,
+        });
+
+        const result = {
+          accessToken,
+        };
+
+        return reply.status(200).send(result);
+      } catch (error) {
+        if (error instanceof TokenError) {
+          throwErrorTokenError(error);
+        }
+
+        throw error;
+      }
     },
   });
 };
