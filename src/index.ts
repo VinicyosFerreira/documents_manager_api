@@ -26,6 +26,7 @@ import fastifyCors from '@fastify/cors';
 import fastifyMultipart from '@fastify/multipart';
 import fastifyJwt from '@fastify/jwt';
 import verifyToken from './hooks/verifyToken.js';
+import fastifyCookie from '@fastify/cookie';
 
 const app = Fastify({
   logger: true,
@@ -39,6 +40,17 @@ app.register(fastifyJwt, {
   secret: process.env.JWT_SECRET || '',
   sign: {
     expiresIn: '30m',
+  },
+});
+
+app.register(fastifyCookie, {
+  secret: process.env.COOKIE_SECRET || '',
+  parseOptions: {
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+    path: '/',
+    signed: true,
   },
 });
 
