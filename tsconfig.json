@@ -11,5 +11,6 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
+    "types": ["vitest/globals"]
   }
 }
