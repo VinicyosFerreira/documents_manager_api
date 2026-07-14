@@ -42,14 +42,10 @@ export const loginUserRoute = async (app: FastifyInstance) => {
         request.body.email,
         request.body.password
       );
-
-      // gerar o access token
+      
       const token = app.jwt.sign({ id: result.id, email: result.email});
-
-      // gerar o refresh token
       const refreshToken = app.jwt.sign({ id: result.id }, { expiresIn: '15d' });
 
-      // salvar no cookie
       reply.setCookie('refreshToken', refreshToken, {
         maxAge: 15 * 24 * 60 * 60,
       });

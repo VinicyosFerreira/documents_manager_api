@@ -121,11 +121,4 @@ app.register(async (privateRoute) => {
   await privateRoute.register(updateDocumentRoute, { prefix: '/documents/me' });
 });
 
-try {
-  await app.listen({
-    port: Number(process.env.PORT) || 8080,
-  });
-} catch (err) {
-  app.log.error(err);
-  process.exit(1);
-}
+export default app;

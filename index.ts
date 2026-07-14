@@ -1,14 +1,9 @@
-import Fastify from 'fastify';
-
-const app = Fastify();
-
-app.get('/', async () => {
-  return { hello: 'world' };
-});
+import 'dotenv/config';
+import app from './src/app.js';
 
 try {
   await app.listen({
-    port: 8000,
+    port: Number(process.env.PORT) || 8080,
   });
 } catch (err) {
   app.log.error(err);

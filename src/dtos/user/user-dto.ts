@@ -13,4 +13,5 @@ export interface UserOutputDTO {
     email: string;
     cpf: string;
     createdAt: Date;
+    deletedAt?: Date | null;
 }
