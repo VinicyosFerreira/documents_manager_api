@@ -6,6 +6,8 @@
   "scripts": {
     "postinstall": "prisma generate",
     "dev": "tsx watch index.ts",
+    "build": "tsc",
+    "lint": "eslint .",
     "test:watch": "vitest",
     "test": "vitest run"
   },
