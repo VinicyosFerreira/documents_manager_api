@@ -1,6 +1,5 @@
-import 'dotenv/config';
+import { s3Client } from '../../lib/s3.js';
 import {
-  S3Client,
   PutObjectCommand,
   GetObjectCommand,
   DeleteObjectCommand,
@@ -9,18 +8,6 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import crypto from 'node:crypto';
 
 export class UploadStorageUseCase {
-  private s3Client: S3Client;
-  constructor() {
-    this.s3Client = new S3Client({
-      region: 'us-east-1',
-      endpoint: 'http://localhost:9000',
-      credentials: {
-        accessKeyId: process.env.MINIO_ROOT_USER || '',
-        secretAccessKey: process.env.MINIO_ROOT_PASSWORD || '',
-      },
-      forcePathStyle: true,
-    });
-  }
   async saveDocument(file: Buffer) {
     const uniqueFileName = crypto.randomUUID() + '.pdf';
 
@@ -32,7 +19,7 @@ export class UploadStorageUseCase {
     });
 
     try {
-      await this.s3Client.send(save);
+      await s3Client.send(save);
       return {
         document_key: `${uniqueFileName}`,
       };
@@ -48,7 +35,7 @@ export class UploadStorageUseCase {
       Key: documentKey,
     });
     try {
-      const signed = await getSignedUrl(this.s3Client, command, {
+      const signed = await getSignedUrl(s3Client, command, {
         expiresIn: 3600,
       });
       return signed;
@@ -65,7 +52,7 @@ export class UploadStorageUseCase {
     });
 
     try {
-      await this.s3Client.send(command);
+      await s3Client.send(command);
       return {
         message: 'Documento deletado com sucesso',
       };
